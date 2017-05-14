@@ -20,6 +20,7 @@ import android.speech.RecognizerIntent;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -30,22 +31,20 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
-import android.widget.FilterQueryProvider;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import br.com.mauker.materialsearchview.adapters.CursorSearchAdapter;
+import br.com.mauker.materialsearchview.adapters.SearchAdapter;
 import br.com.mauker.materialsearchview.db.HistoryContract;
+import br.com.mauker.materialsearchview.db.HistoryDataSource;
+import br.com.mauker.materialsearchview.models.HistoryItem;
 import br.com.mauker.materialsearchview.utils.AnimationUtils;
 
 /**
@@ -149,14 +148,19 @@ public class MaterialSearchView extends FrameLayout {
     private ImageButton mClear;
 
     /**
-     * The ListView for displaying suggestions based on the search.
+     * The RecyclerView for displaying suggestions based on the search.
      */
-    private ListView mSuggestionsListView;
+    private RecyclerView mSuggestionsRecyclerView;
 
     /**
      * Adapter for displaying suggestions.
      */
-    private CursorAdapter mAdapter;
+    private SearchAdapter mAdapter;
+
+    /**
+     * Data source to pull history items from.
+     */
+    private HistoryDataSource mDataSource;
     //endregion
 
     //region Query Properties
@@ -229,7 +233,7 @@ public class MaterialSearchView extends FrameLayout {
         mSearchEditText = (EditText) mRoot.findViewById(R.id.et_search);
         mVoice = (ImageButton) mRoot.findViewById(R.id.action_voice);
         mClear = (ImageButton) mRoot.findViewById(R.id.action_clear);
-        mSuggestionsListView = (ListView) mRoot.findViewById(R.id.suggestion_list);
+        mSuggestionsRecyclerView = (RecyclerView) mRoot.findViewById(R.id.suggestion_list);
 
         // Set click listeners
         mBack.setOnClickListener(new View.OnClickListener() {
@@ -268,29 +272,34 @@ public class MaterialSearchView extends FrameLayout {
         // Initialize the search view.
         initSearchView();
 
-        mAdapter = new CursorSearchAdapter(mContext,getHistoryCursor(),0);
-        mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
-            @Override
-            public Cursor runQuery(CharSequence constraint) {
-                String filter = constraint.toString();
+        mDataSource.open();
+        List<HistoryItem> historyItems = mDataSource.getHistory(MAX_HISTORY);
+        mDataSource.close();
+        mAdapter = new SearchAdapter(historyItems);
 
-                if (filter.isEmpty()) {
-                    return getHistoryCursor();
-                }
-                else {
-                    return mContext.getContentResolver().query(
-                            HistoryContract.HistoryEntry.CONTENT_URI,
-                            null,
-                            HistoryContract.HistoryEntry.COLUMN_QUERY + " LIKE ?",
-                            new String[]{"%" + filter + "%"},
-                            HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " DESC, " +
-                                    HistoryContract.HistoryEntry.COLUMN_QUERY
-                    );
-                }
-            }
-        });
-        mSuggestionsListView.setAdapter(mAdapter);
-        mSuggestionsListView.setTextFilterEnabled(true);
+        //TODO: Find a way to filter queries.
+//        mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+//            @Override
+//            public Cursor runQuery(CharSequence constraint) {
+//                String filter = constraint.toString();
+//
+//                if (filter.isEmpty()) {
+//                    return getHistoryCursor();
+//                }
+//                else {
+//                    return mContext.getContentResolver().query(
+//                            HistoryContract.HistoryEntry.CONTENT_URI,
+//                            null,
+//                            HistoryContract.HistoryEntry.COLUMN_QUERY + " LIKE ?",
+//                            new String[]{"%" + filter + "%"},
+//                            HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " DESC, " +
+//                                    HistoryContract.HistoryEntry.COLUMN_QUERY
+//                    );
+//                }
+//            }
+//        });
+
+        mSuggestionsRecyclerView.setAdapter(mAdapter);
     }
 
     /**
@@ -398,8 +407,7 @@ public class MaterialSearchView extends FrameLayout {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // When the text changes, filter
-                mAdapter.getFilter().filter(s.toString());
-                mAdapter.notifyDataSetChanged();
+                mAdapter.filter(s.toString());
                 MaterialSearchView.this.onTextChanged(s);
             }
 
@@ -417,6 +425,8 @@ public class MaterialSearchView extends FrameLayout {
                 }
             }
         });
+
+        mDataSource = new HistoryDataSource(getContext());
     }
     //endregion
 
@@ -472,7 +482,7 @@ public class MaterialSearchView extends FrameLayout {
      * Displays the available suggestions, if any.
      */
     private void showSuggestions() {
-        mSuggestionsListView.setVisibility(View.VISIBLE);
+        mSuggestionsRecyclerView.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -514,7 +524,7 @@ public class MaterialSearchView extends FrameLayout {
      * Hides the suggestion list.
      */
     private void dismissSuggestions() {
-        mSuggestionsListView.setVisibility(View.GONE);
+        mSuggestionsRecyclerView.setVisibility(View.GONE);
     }
 
     /**
@@ -622,7 +632,7 @@ public class MaterialSearchView extends FrameLayout {
 
                 // Refresh the cursor on the adapter,
                 // so the new entry will be shown on the next time the user opens the search view.
-                refreshAdapterCursor();
+                refreshHistory();
 
                 closeSearch();
                 mSearchEditText.setText("");
@@ -665,8 +675,8 @@ public class MaterialSearchView extends FrameLayout {
      *
      * @param listener - The ItemClickListener.
      */
-    public void setOnItemClickListener(AdapterView.OnItemClickListener listener) {
-        mSuggestionsListView.setOnItemClickListener(listener);
+    public void setOnItemClickListener(SearchAdapter.OnHistoryItemClickListener listener) {
+        mAdapter.setOnHistoryItemClickListener(listener);
     }
 
     /**
@@ -674,8 +684,8 @@ public class MaterialSearchView extends FrameLayout {
      *
      * @param listener - The ItemLongClickListener.
      */
-    public void setOnItemLongClickListener(AdapterView.OnItemLongClickListener listener) {
-        mSuggestionsListView.setOnItemLongClickListener(listener);
+    public void setOnItemLongClickListener(SearchAdapter.OnHistoryItemLongClickListener listener) {
+        mAdapter.setOnHistoryItemLongClickListener(listener);
     }
     
     /**
@@ -881,7 +891,7 @@ public class MaterialSearchView extends FrameLayout {
      */
     public void setSuggestionBackground(int resource) {
         if (resource > 0) {
-            mSuggestionsListView.setBackgroundResource(resource);
+            mSuggestionsRecyclerView.setBackgroundResource(resource);
         }
     }
 
@@ -934,7 +944,7 @@ public class MaterialSearchView extends FrameLayout {
     /**
      * Retrieves the adapter.
      */
-    public CursorAdapter getAdapter() {
+    public RecyclerView.Adapter getAdapter() {
         return mAdapter ;
     }
     //endregion
@@ -980,10 +990,10 @@ public class MaterialSearchView extends FrameLayout {
      */
     public String getSuggestionAtPosition(int position) {
         // If position is out of range just return empty string.
-        if(position < 0 || position >= mAdapter.getCount()) {
+        if(position < 0 || position >= mAdapter.getItemCount()) {
             return "";
         } else {
-            return mAdapter.getItem(position).toString();
+            return mAdapter.getItem(position).getQuery();
         }
     }
     //endregion
@@ -1017,7 +1027,7 @@ public class MaterialSearchView extends FrameLayout {
 //    }
 
     public void activityResumed() {
-        refreshAdapterCursor();
+        refreshHistory();
     }
     //endregion
 
@@ -1106,19 +1116,10 @@ public class MaterialSearchView extends FrameLayout {
         addSuggestions(list);
     }
 
-    private Cursor getHistoryCursor() {
-        return mContext.getContentResolver().query(
-                HistoryContract.HistoryEntry.CONTENT_URI,
-                null,
-                HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " = ?",
-                new String[]{"1"},
-                HistoryContract.HistoryEntry.COLUMN_INSERT_DATE + " DESC LIMIT " + MAX_HISTORY
-        );
-    }
-
-    private void refreshAdapterCursor() {
-        Cursor historyCursor = getHistoryCursor();
-        mAdapter.changeCursor(historyCursor);
+    private void refreshHistory() {
+        mDataSource.open();
+        mAdapter.swapItems(mDataSource.getHistory(MAX_HISTORY));
+        mDataSource.close();
     }
 
     public synchronized void clearSuggestions() {

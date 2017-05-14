@@ -10,13 +10,14 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
 import br.com.mauker.materialsearchview.MaterialSearchView;
+import br.com.mauker.materialsearchview.adapters.SearchAdapter;
+import br.com.mauker.materialsearchview.models.HistoryItem;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,13 +67,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        searchView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        searchView.setOnItemClickListener(new SearchAdapter.OnHistoryItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Do something when the suggestion list is clicked.
-                String suggestion = searchView.getSuggestionAtPosition(position);
-
-                searchView.setQuery(suggestion, false);
+            public void onHistoryItemClick(HistoryItem item) {
+                searchView.setQuery(item.getQuery(), false);
             }
         });
 
@@ -101,11 +99,10 @@ public class MainActivity extends AppCompatActivity {
         searchView.adjustTintAlpha(0.8f);
 
         final Context context = this;
-        searchView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        searchView.setOnItemLongClickListener(new SearchAdapter.OnHistoryItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(context, "Long clicked position: " + i, Toast.LENGTH_SHORT).show();
-                return true;
+            public void onHistoryItemLongClick(HistoryItem historyItem) {
+                Toast.makeText(context, "Long clicked item: " + historyItem.getQuery(), Toast.LENGTH_SHORT).show();
             }
         });
 
