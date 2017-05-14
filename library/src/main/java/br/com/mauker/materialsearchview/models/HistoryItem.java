@@ -24,6 +24,20 @@ public class HistoryItem {
         this.isHistory = (historyInteger == 1);
     }
 
+    public HistoryItem(String query) {
+        this(query, false);
+    }
+
+    public HistoryItem(String query, boolean isHistory) {
+        this(query, isHistory, System.currentTimeMillis());
+    }
+
+    public HistoryItem(String query, boolean isHistory, long insertDate) {
+        this.query = query;
+        this.isHistory = isHistory;
+        this.insertDate = insertDate;
+    }
+
     public String getQuery() {
         return query;
     }

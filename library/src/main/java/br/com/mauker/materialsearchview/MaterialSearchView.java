@@ -20,6 +20,7 @@ import android.speech.RecognizerIntent;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputType;
@@ -234,6 +235,9 @@ public class MaterialSearchView extends FrameLayout {
         mVoice = (ImageButton) mRoot.findViewById(R.id.action_voice);
         mClear = (ImageButton) mRoot.findViewById(R.id.action_clear);
         mSuggestionsRecyclerView = (RecyclerView) mRoot.findViewById(R.id.suggestion_list);
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        mSuggestionsRecyclerView.setLayoutManager(linearLayoutManager);
 
         // Set click listeners
         mBack.setOnClickListener(new View.OnClickListener() {
@@ -1040,13 +1044,11 @@ public class MaterialSearchView extends FrameLayout {
     **/
     public synchronized void saveQueryToDb(String query, long ms) {
         if (!TextUtils.isEmpty(query) && ms > 0) {
-            ContentValues values = new ContentValues();
-        
-            values.put(HistoryContract.HistoryEntry.COLUMN_QUERY, query);
-            values.put(HistoryContract.HistoryEntry.COLUMN_INSERT_DATE, ms);
-            values.put(HistoryContract.HistoryEntry.COLUMN_IS_HISTORY,1); // Saving as history.
+            HistoryItem item = new HistoryItem(query, true, ms);
 
-            mContext.getContentResolver().insert(HistoryContract.HistoryEntry.CONTENT_URI,values);
+            mDataSource.open();
+            mDataSource.insertHistoryItem(item);
+            mDataSource.close();
         }
     }
 
@@ -1056,16 +1058,11 @@ public class MaterialSearchView extends FrameLayout {
      */
     public synchronized void addSuggestion(String suggestion) {
         if (!TextUtils.isEmpty(suggestion)) {
-            ContentValues value = new ContentValues();
-            value.put(HistoryContract.HistoryEntry.COLUMN_QUERY, suggestion);
-            value.put(HistoryContract.HistoryEntry.COLUMN_INSERT_DATE, System.currentTimeMillis());
-            value.put(HistoryContract.HistoryEntry.COLUMN_IS_HISTORY,0); // Saving as suggestion.
+            HistoryItem historyItem = new HistoryItem(suggestion);
 
-
-            mContext.getContentResolver().insert(
-                    HistoryContract.HistoryEntry.CONTENT_URI,
-                    value
-            );
+            mDataSource.open();
+            mDataSource.insertHistoryItem(historyItem);
+            mDataSource.close();
         }
     }
 
@@ -1076,39 +1073,16 @@ public class MaterialSearchView extends FrameLayout {
      */
     public synchronized void removeSuggestion(String suggestion) {
         if (!TextUtils.isEmpty(suggestion)) {
-            mContext.getContentResolver().delete(
-                    HistoryContract.HistoryEntry.CONTENT_URI,
-                    HistoryContract.HistoryEntry.TABLE_NAME +
-                            "." +
-                            HistoryContract.HistoryEntry.COLUMN_QUERY +
-                            " = ? AND " +
-                            HistoryContract.HistoryEntry.TABLE_NAME +
-                            "." +
-                            HistoryContract.HistoryEntry.COLUMN_IS_HISTORY +
-                            " = ?"
-                    ,
-                    new String[]{suggestion,String.valueOf(0)}
-                    );
+            mDataSource.open();
+            mDataSource.deleteSuggestion(suggestion);
+            mDataSource.close();
         }
     }
 
     public synchronized void addSuggestions(List<String> suggestions) {
-        ArrayList<ContentValues> toSave = new ArrayList<>();
-        for (String str : suggestions) {
-            ContentValues value = new ContentValues();
-            value.put(HistoryContract.HistoryEntry.COLUMN_QUERY, str);
-            value.put(HistoryContract.HistoryEntry.COLUMN_INSERT_DATE, System.currentTimeMillis());
-            value.put(HistoryContract.HistoryEntry.COLUMN_IS_HISTORY,0); // Saving as suggestion.
-
-            toSave.add(value);
-        }
-
-        ContentValues[] values = toSave.toArray(new ContentValues[toSave.size()]);
-
-        mContext.getContentResolver().bulkInsert(
-                HistoryContract.HistoryEntry.CONTENT_URI,
-                values
-        );
+        mDataSource.open();
+        mDataSource.bulkInsertHistoryItem(suggestions);
+        mDataSource.close();
     }
 
     public void addSuggestions(String[] suggestions) {
@@ -1123,27 +1097,24 @@ public class MaterialSearchView extends FrameLayout {
     }
 
     public synchronized void clearSuggestions() {
-        mContext.getContentResolver().delete(
-                HistoryContract.HistoryEntry.CONTENT_URI,
-                HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " = ?",
-                new String[]{"0"}
-        );
+        mDataSource.open();
+        mDataSource.deleteAllSuggestions();
+        mDataSource.close();
+        refreshHistory();
     }
 
     public synchronized void clearHistory() {
-        mContext.getContentResolver().delete(
-                HistoryContract.HistoryEntry.CONTENT_URI,
-                HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " = ?",
-                new String[]{"1"}
-        );
+        mDataSource.open();
+        mDataSource.deleteAllHistoryItems();
+        mDataSource.close();
+        refreshHistory();
     }
 
     public synchronized void clearAll() {
-        mContext.getContentResolver().delete(
-                HistoryContract.HistoryEntry.CONTENT_URI,
-                null,
-                null
-        );
+        mDataSource.open();
+        mDataSource.deleteAllHistory();
+        mDataSource.close();
+        refreshHistory();
     }
     //endregion
 

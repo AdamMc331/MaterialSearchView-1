@@ -1,5 +1,6 @@
 package br.com.mauker.materialsearchview.db;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -7,11 +8,12 @@ import android.database.sqlite.SQLiteException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import br.com.mauker.materialsearchview.models.HistoryItem;
 
 /**
- * Datasource for connecting to the database that can replace the {@link HistoryProvider}
+ * Datasource for connecting to the database that can replace the ContentProvider.
  *
  * Created by adam.mcneilly on 5/11/17.
  */
@@ -97,5 +99,65 @@ public class HistoryDataSource {
      */
     public long insertHistoryItem(HistoryItem item) {
         return database.insert(HistoryContract.HistoryEntry.TABLE_NAME, null, item.getContentValues());
+    }
+
+    public void bulkInsertHistoryItem(List<String> suggestions) {
+        ContentValues[] contentValues = new ContentValues[suggestions.size()];
+
+        for (int i = 0; i < suggestions.size(); i++) {
+            String suggestion = suggestions.get(i);
+            HistoryItem item = new HistoryItem(suggestion);
+            contentValues[i] = item.getContentValues();
+        }
+
+        database.beginTransaction();
+        try {
+            for (ContentValues values : contentValues) {
+                database.insert(HistoryContract.HistoryEntry.TABLE_NAME, null, values);
+            }
+            database.setTransactionSuccessful();
+        } finally {
+            database.endTransaction();
+        }
+    }
+
+    public int deleteSuggestion(String suggestion) {
+        return database.delete(
+                HistoryContract.HistoryEntry.TABLE_NAME,
+                HistoryContract.HistoryEntry.COLUMN_QUERY + " = ? AND " + HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " = ?",
+                new String[] { suggestion, "0" }
+        );
+    }
+
+    public int deleteAllSuggestions() {
+        return database.delete(
+                HistoryContract.HistoryEntry.TABLE_NAME,
+                HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " = ?",
+                new String[] { "0" }
+        );
+    }
+
+    public int deleteHistoryItem(String query) {
+        return database.delete(
+                HistoryContract.HistoryEntry.TABLE_NAME,
+                HistoryContract.HistoryEntry.COLUMN_QUERY + " = ? AND " + HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " = ?",
+                new String[] { query, "1" }
+        );
+    }
+
+    public int deleteAllHistoryItems() {
+        return database.delete(
+                HistoryContract.HistoryEntry.TABLE_NAME,
+                HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " = ?",
+                new String[] { "1" }
+        );
+    }
+
+    public int deleteAllHistory() {
+        return database.delete(
+                HistoryContract.HistoryEntry.TABLE_NAME,
+                null,
+                null
+        );
     }
 }
