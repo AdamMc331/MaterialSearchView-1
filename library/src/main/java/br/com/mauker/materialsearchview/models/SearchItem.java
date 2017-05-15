@@ -11,12 +11,12 @@ import br.com.mauker.materialsearchview.db.HistoryContract;
  *
  * Created by adam.mcneilly on 5/11/17.
  */
-public class HistoryItem {
+public class SearchItem {
     private String query;
     private boolean isHistory;
     private long insertDate;
 
-    public HistoryItem(Cursor cursor) {
+    public SearchItem(Cursor cursor) {
         this.query = cursor.getString(cursor.getColumnIndex(HistoryContract.HistoryEntry.COLUMN_QUERY));
         this.insertDate = cursor.getLong(cursor.getColumnIndex(HistoryContract.HistoryEntry.COLUMN_INSERT_DATE));
 
@@ -24,15 +24,15 @@ public class HistoryItem {
         this.isHistory = (historyInteger == 1);
     }
 
-    public HistoryItem(String query) {
+    public SearchItem(String query) {
         this(query, false);
     }
 
-    public HistoryItem(String query, boolean isHistory) {
+    public SearchItem(String query, boolean isHistory) {
         this(query, isHistory, System.currentTimeMillis());
     }
 
-    public HistoryItem(String query, boolean isHistory, long insertDate) {
+    public SearchItem(String query, boolean isHistory, long insertDate) {
         this.query = query;
         this.isHistory = isHistory;
         this.insertDate = insertDate;

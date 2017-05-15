@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.mauker.materialsearchview.R;
-import br.com.mauker.materialsearchview.models.HistoryItem;
+import br.com.mauker.materialsearchview.models.SearchItem;
 
 /**
  * Adapter that displays the user's search history.
@@ -21,11 +21,11 @@ import br.com.mauker.materialsearchview.models.HistoryItem;
  */
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchViewHolder> {
 
-    private List<HistoryItem> history = new ArrayList<>();
-    private OnHistoryItemClickListener onHistoryItemClickListener;
-    private OnHistoryItemLongClickListener onHistoryItemLongClickListener;
+    private List<SearchItem> history = new ArrayList<>();
+    private OnSearchItemClickListener onSearchItemClickListener;
+    private OnSearchItemLongClickListener onSearchItemLongClickListener;
 
-    public SearchAdapter(List<HistoryItem> history) {
+    public SearchAdapter(List<SearchItem> history) {
         this.history = history;
     }
 
@@ -46,11 +46,11 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         return history.size();
     }
 
-    public HistoryItem getItem(int position) {
+    public SearchItem getItem(int position) {
         return history.get(position);
     }
 
-    public void swapItems(List<HistoryItem> history) {
+    public void swapItems(List<SearchItem> history) {
         this.history = history;
         notifyDataSetChanged();
     }
@@ -61,12 +61,12 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         notifyDataSetChanged();
     }
 
-    public void setOnHistoryItemClickListener(OnHistoryItemClickListener listener) {
-        this.onHistoryItemClickListener = listener;
+    public void setOnSearchItemClickListener(OnSearchItemClickListener listener) {
+        this.onSearchItemClickListener = listener;
     }
 
-    public void setOnHistoryItemLongClickListener(OnHistoryItemLongClickListener listener) {
-        this.onHistoryItemLongClickListener = listener;
+    public void setOnSearchItemLongClickListener(OnSearchItemLongClickListener listener) {
+        this.onSearchItemLongClickListener = listener;
     }
 
     public class SearchViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
@@ -83,22 +83,22 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
             content = (TextView) view.findViewById(R.id.tv_str);
         }
 
-        public void bindItem(HistoryItem item) {
+        public void bindItem(SearchItem item) {
             this.icon.setImageResource(item.getImageResource());
             this.content.setText(item.getQuery());
         }
 
         @Override
         public void onClick(View v) {
-            if (onHistoryItemClickListener != null) {
-                onHistoryItemClickListener.onHistoryItemClick(history.get(getAdapterPosition()));
+            if (onSearchItemClickListener != null) {
+                onSearchItemClickListener.onSearchItemClick(history.get(getAdapterPosition()));
             }
         }
 
         @Override
         public boolean onLongClick(View v) {
-            if (onHistoryItemLongClickListener != null) {
-                onHistoryItemLongClickListener.onHistoryItemLongClick(history.get(getAdapterPosition()));
+            if (onSearchItemLongClickListener != null) {
+                onSearchItemLongClickListener.onSearchItemLongClick(history.get(getAdapterPosition()));
                 return true;
             } else {
                 return false;
@@ -106,11 +106,11 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         }
     }
 
-    public interface OnHistoryItemClickListener {
-        void onHistoryItemClick(HistoryItem item);
+    public interface OnSearchItemClickListener {
+        void onSearchItemClick(SearchItem item);
     }
 
-    public interface OnHistoryItemLongClickListener {
-        void onHistoryItemLongClick(HistoryItem historyItem);
+    public interface OnSearchItemLongClickListener {
+        void onSearchItemLongClick(SearchItem searchItem);
     }
 }

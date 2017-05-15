@@ -3,21 +3,18 @@ package br.com.mauker.materialsearchview;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.speech.RecognizerIntent;
-import android.support.annotation.FloatRange;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
@@ -45,9 +42,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import br.com.mauker.materialsearchview.adapters.SearchAdapter;
-import br.com.mauker.materialsearchview.db.HistoryContract;
 import br.com.mauker.materialsearchview.db.HistoryDataSource;
-import br.com.mauker.materialsearchview.models.HistoryItem;
+import br.com.mauker.materialsearchview.models.SearchItem;
 import br.com.mauker.materialsearchview.utils.AnimationUtils;
 
 /**
@@ -279,9 +275,9 @@ public class MaterialSearchView extends FrameLayout {
         initSearchView();
 
         mDataSource.open();
-        List<HistoryItem> historyItems = mDataSource.getHistory(MAX_HISTORY);
+        List<SearchItem> searchItems = mDataSource.getHistory(MAX_HISTORY);
         mDataSource.close();
-        mAdapter = new SearchAdapter(historyItems);
+        mAdapter = new SearchAdapter(searchItems);
 
         //TODO: Find a way to filter queries.
 //        mAdapter.setFilterQueryProvider(new FilterQueryProvider() {
@@ -681,8 +677,8 @@ public class MaterialSearchView extends FrameLayout {
      *
      * @param listener - The ItemClickListener.
      */
-    public void setOnItemClickListener(SearchAdapter.OnHistoryItemClickListener listener) {
-        mAdapter.setOnHistoryItemClickListener(listener);
+    public void setOnItemClickListener(SearchAdapter.OnSearchItemClickListener listener) {
+        mAdapter.setOnSearchItemClickListener(listener);
     }
 
     /**
@@ -690,8 +686,8 @@ public class MaterialSearchView extends FrameLayout {
      *
      * @param listener - The ItemLongClickListener.
      */
-    public void setOnItemLongClickListener(SearchAdapter.OnHistoryItemLongClickListener listener) {
-        mAdapter.setOnHistoryItemLongClickListener(listener);
+    public void setOnItemLongClickListener(SearchAdapter.OnSearchItemLongClickListener listener) {
+        mAdapter.setOnSearchItemLongClickListener(listener);
     }
     
     /**
@@ -1046,10 +1042,10 @@ public class MaterialSearchView extends FrameLayout {
     **/
     public synchronized void saveQueryToDb(String query, long ms) {
         if (!TextUtils.isEmpty(query) && ms > 0) {
-            HistoryItem item = new HistoryItem(query, true, ms);
+            SearchItem item = new SearchItem(query, true, ms);
 
             mDataSource.open();
-            mDataSource.insertHistoryItem(item);
+            mDataSource.insertSearchItem(item);
             mDataSource.close();
         }
     }
@@ -1060,10 +1056,10 @@ public class MaterialSearchView extends FrameLayout {
      */
     public synchronized void addSuggestion(String suggestion) {
         if (!TextUtils.isEmpty(suggestion)) {
-            HistoryItem historyItem = new HistoryItem(suggestion);
+            SearchItem searchItem = new SearchItem(suggestion);
 
             mDataSource.open();
-            mDataSource.insertHistoryItem(historyItem);
+            mDataSource.insertSearchItem(searchItem);
             mDataSource.close();
         }
     }
@@ -1083,7 +1079,7 @@ public class MaterialSearchView extends FrameLayout {
 
     public synchronized void addSuggestions(List<String> suggestions) {
         mDataSource.open();
-        mDataSource.bulkInsertHistoryItem(suggestions);
+        mDataSource.bulkInsertSuggestions(suggestions);
         mDataSource.close();
     }
 

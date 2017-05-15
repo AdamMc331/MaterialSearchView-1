@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 import br.com.mauker.materialsearchview.MaterialSearchView;
 import br.com.mauker.materialsearchview.adapters.SearchAdapter;
-import br.com.mauker.materialsearchview.models.HistoryItem;
+import br.com.mauker.materialsearchview.models.SearchItem;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,9 +67,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        searchView.setOnItemClickListener(new SearchAdapter.OnHistoryItemClickListener() {
+        searchView.setOnItemClickListener(new SearchAdapter.OnSearchItemClickListener() {
             @Override
-            public void onHistoryItemClick(HistoryItem item) {
+            public void onSearchItemClick(SearchItem item) {
                 searchView.setQuery(item.getQuery(), false);
             }
         });
@@ -99,10 +99,10 @@ public class MainActivity extends AppCompatActivity {
         searchView.adjustTintAlpha(0.8f);
 
         final Context context = this;
-        searchView.setOnItemLongClickListener(new SearchAdapter.OnHistoryItemLongClickListener() {
+        searchView.setOnItemLongClickListener(new SearchAdapter.OnSearchItemLongClickListener() {
             @Override
-            public void onHistoryItemLongClick(HistoryItem historyItem) {
-                Toast.makeText(context, "Long clicked item: " + historyItem.getQuery(), Toast.LENGTH_SHORT).show();
+            public void onSearchItemLongClick(SearchItem searchItem) {
+                Toast.makeText(context, "Long clicked item: " + searchItem.getQuery(), Toast.LENGTH_SHORT).show();
             }
         });
 

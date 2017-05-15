@@ -8,9 +8,8 @@ import android.database.sqlite.SQLiteException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
-import br.com.mauker.materialsearchview.models.HistoryItem;
+import br.com.mauker.materialsearchview.models.SearchItem;
 
 /**
  * Datasource for connecting to the database that can replace the ContentProvider.
@@ -73,8 +72,8 @@ public class HistoryDataSource {
      * @param limit The number of searches to return.
      * @return A list of search items up to size "limit".
      */
-    public List<HistoryItem> getHistory(int limit) {
-        List<HistoryItem> results = new ArrayList<>();
+    public List<SearchItem> getHistory(int limit) {
+        List<SearchItem> results = new ArrayList<>();
 
         Cursor cursor = getHistoryCursor(
                 null,
@@ -84,7 +83,7 @@ public class HistoryDataSource {
         );
 
         while (cursor.moveToNext()) {
-            results.add(new HistoryItem(cursor));
+            results.add(new SearchItem(cursor));
         }
 
         cursor.close();
@@ -97,16 +96,16 @@ public class HistoryDataSource {
      * @param item The item to be inserted.
      * @return The identifier of the row that was created.
      */
-    public long insertHistoryItem(HistoryItem item) {
+    public long insertSearchItem(SearchItem item) {
         return database.insert(HistoryContract.HistoryEntry.TABLE_NAME, null, item.getContentValues());
     }
 
-    public void bulkInsertHistoryItem(List<String> suggestions) {
+    public void bulkInsertSuggestions(List<String> suggestions) {
         ContentValues[] contentValues = new ContentValues[suggestions.size()];
 
         for (int i = 0; i < suggestions.size(); i++) {
             String suggestion = suggestions.get(i);
-            HistoryItem item = new HistoryItem(suggestion);
+            SearchItem item = new SearchItem(suggestion);
             contentValues[i] = item.getContentValues();
         }
 
