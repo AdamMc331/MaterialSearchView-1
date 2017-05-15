@@ -21,6 +21,6 @@ allprojects {
 
     ext {
         supportLibraryVersion = "25.3.1"
-        constraintLayoutVersion = "1.0.1"
+        constraintLayoutVersion = "1.0.2"
     }
 }

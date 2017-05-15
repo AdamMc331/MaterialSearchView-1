@@ -10,22 +10,28 @@
 
     <View
         android:id="@+id/transparent_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/search_layover_bg" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/search_layover_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp" />
 
     <LinearLayout
         android:id="@+id/search_bar"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/search_field_bg"
         android:gravity="start"
         android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_constraintBottom_creator="1"
-        tools:layout_constraintLeft_creator="1"
-        tools:layout_constraintRight_creator="1"
-        tools:layout_constraintTop_creator="1">
+        tools:layout_constraintTop_creator="1"
+        tools:layout_editor_absoluteX="8dp">
 
         <ImageButton
             android:id="@+id/action_back"
@@ -83,7 +89,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_default="wrap"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_bar"
-        tools:layout_constraintBottom_creator="1"
-        tools:layout_constraintTop_creator="1" />
+        app:layout_constraintTop_toBottomOf="@+id/search_bar"
+        tools:layout_constraintTop_creator="1"
+        tools:layout_editor_absoluteX="0dp" />
 </android.support.constraint.ConstraintLayout>
