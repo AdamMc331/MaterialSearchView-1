@@ -17,6 +17,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.speech.RecognizerIntent;
+import android.support.annotation.FloatRange;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatDelegate;
@@ -121,7 +123,7 @@ public class MaterialSearchView extends FrameLayout {
     /**
      * The root of the search view.
      */
-    private FrameLayout mRoot;
+    private ConstraintLayout mRoot;
 
     /**
      * The bar at the top of the SearchView containing the EditText and ImageButtons.
@@ -227,7 +229,7 @@ public class MaterialSearchView extends FrameLayout {
         LayoutInflater.from(mContext).inflate(R.layout.search_view, this, true);
 
         // Get items
-        mRoot = (FrameLayout) findViewById(R.id.search_layout);
+        mRoot = (ConstraintLayout) findViewById(R.id.search_layout);
         mTintView = mRoot.findViewById(R.id.transparent_view);
         mSearchBar = (LinearLayout) mRoot.findViewById(R.id.search_bar);
         mBack = (ImageButton) mRoot.findViewById(R.id.action_back);
