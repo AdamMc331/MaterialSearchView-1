@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         searchView.setOnItemClickListener(new SearchAdapter.OnSearchItemClickListener() {
             @Override
-            public void onSearchItemClick(SearchItem item) {
+            public void onSearchItemClick(SearchItem item, int position) {
                 searchView.setQuery(item.getQuery(), false);
             }
         });
@@ -101,8 +101,8 @@ public class MainActivity extends AppCompatActivity {
         final Context context = this;
         searchView.setOnItemLongClickListener(new SearchAdapter.OnSearchItemLongClickListener() {
             @Override
-            public void onSearchItemLongClick(SearchItem searchItem) {
-                Toast.makeText(context, "Long clicked item: " + searchItem.getQuery(), Toast.LENGTH_SHORT).show();
+            public void onSearchItemLongClick(SearchItem searchItem, int position) {
+                Toast.makeText(context, "Long clicked item: " + position, Toast.LENGTH_SHORT).show();
             }
         });
 

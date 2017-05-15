@@ -69,6 +69,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         this.onSearchItemLongClickListener = listener;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public class SearchViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         private ImageView icon;
         private TextView content;
@@ -91,14 +92,14 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         @Override
         public void onClick(View v) {
             if (onSearchItemClickListener != null) {
-                onSearchItemClickListener.onSearchItemClick(history.get(getAdapterPosition()));
+                onSearchItemClickListener.onSearchItemClick(history.get(getAdapterPosition()), getAdapterPosition());
             }
         }
 
         @Override
         public boolean onLongClick(View v) {
             if (onSearchItemLongClickListener != null) {
-                onSearchItemLongClickListener.onSearchItemLongClick(history.get(getAdapterPosition()));
+                onSearchItemLongClickListener.onSearchItemLongClick(history.get(getAdapterPosition()), getAdapterPosition());
                 return true;
             } else {
                 return false;
@@ -107,10 +108,10 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
     }
 
     public interface OnSearchItemClickListener {
-        void onSearchItemClick(SearchItem item);
+        void onSearchItemClick(SearchItem item, int position);
     }
 
     public interface OnSearchItemLongClickListener {
-        void onSearchItemLongClick(SearchItem searchItem);
+        void onSearchItemLongClick(SearchItem searchItem, int position);
     }
 }
