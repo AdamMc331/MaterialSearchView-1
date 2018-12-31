@@ -280,7 +280,7 @@ public class MaterialSearchView extends FrameLayout {
                 }
                 else {
                     return mContext.getContentResolver().query(
-                            HistoryContract.HistoryEntry.CONTENT_URI,
+                            HistoryContract.HistoryEntry.Companion.getCONTENT_URI(),
                             null,
                             HistoryContract.HistoryEntry.COLUMN_QUERY + " LIKE ?",
                             new String[]{"%" + filter + "%"},
@@ -1095,7 +1095,7 @@ public class MaterialSearchView extends FrameLayout {
             values.put(HistoryContract.HistoryEntry.COLUMN_INSERT_DATE, ms);
             values.put(HistoryContract.HistoryEntry.COLUMN_IS_HISTORY,1); // Saving as history.
 
-            mContext.getContentResolver().insert(HistoryContract.HistoryEntry.CONTENT_URI,values);
+            mContext.getContentResolver().insert(HistoryContract.HistoryEntry.Companion.getCONTENT_URI(), values);
         }
     }
 
@@ -1112,7 +1112,7 @@ public class MaterialSearchView extends FrameLayout {
 
 
             mContext.getContentResolver().insert(
-                    HistoryContract.HistoryEntry.CONTENT_URI,
+                    HistoryContract.HistoryEntry.Companion.getCONTENT_URI(),
                     value
             );
         }
@@ -1126,7 +1126,7 @@ public class MaterialSearchView extends FrameLayout {
     public synchronized void removeSuggestion(String suggestion) {
         if (!TextUtils.isEmpty(suggestion)) {
             mContext.getContentResolver().delete(
-                    HistoryContract.HistoryEntry.CONTENT_URI,
+                    HistoryContract.HistoryEntry.Companion.getCONTENT_URI(),
                     HistoryContract.HistoryEntry.TABLE_NAME +
                             "." +
                             HistoryContract.HistoryEntry.COLUMN_QUERY +
@@ -1155,7 +1155,7 @@ public class MaterialSearchView extends FrameLayout {
         ContentValues[] values = toSave.toArray(new ContentValues[toSave.size()]);
 
         mContext.getContentResolver().bulkInsert(
-                HistoryContract.HistoryEntry.CONTENT_URI,
+                HistoryContract.HistoryEntry.Companion.getCONTENT_URI(),
                 values
         );
     }
@@ -1167,7 +1167,7 @@ public class MaterialSearchView extends FrameLayout {
 
     private Cursor getHistoryCursor() {
         return mContext.getContentResolver().query(
-                HistoryContract.HistoryEntry.CONTENT_URI,
+                HistoryContract.HistoryEntry.Companion.getCONTENT_URI(),
                 null,
                 HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " = ?",
                 new String[]{"1"},
@@ -1182,7 +1182,7 @@ public class MaterialSearchView extends FrameLayout {
 
     public synchronized void clearSuggestions() {
         mContext.getContentResolver().delete(
-                HistoryContract.HistoryEntry.CONTENT_URI,
+                HistoryContract.HistoryEntry.Companion.getCONTENT_URI(),
                 HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " = ?",
                 new String[]{"0"}
         );
@@ -1190,7 +1190,7 @@ public class MaterialSearchView extends FrameLayout {
 
     public synchronized void clearHistory() {
         mContext.getContentResolver().delete(
-                HistoryContract.HistoryEntry.CONTENT_URI,
+                HistoryContract.HistoryEntry.Companion.getCONTENT_URI(),
                 HistoryContract.HistoryEntry.COLUMN_IS_HISTORY + " = ?",
                 new String[]{"1"}
         );
@@ -1198,7 +1198,7 @@ public class MaterialSearchView extends FrameLayout {
 
     public synchronized void clearAll() {
         mContext.getContentResolver().delete(
-                HistoryContract.HistoryEntry.CONTENT_URI,
+                HistoryContract.HistoryEntry.Companion.getCONTENT_URI(),
                 null,
                 null
         );

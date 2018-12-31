@@ -33,7 +33,7 @@ public class HistoryProvider extends ContentProvider {
     }
 
     public static UriMatcher buildUriMatcher() {
-        String content = HistoryContract.CONTENT_AUTHORITY;
+        String content = HistoryContract.INSTANCE.getCONTENT_AUTHORITY();
 
         // All paths to the UriMatcher have a corresponding code to return
         // when a match is found (the ints above).
@@ -131,11 +131,11 @@ public class HistoryProvider extends ContentProvider {
     public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case SEARCH_HISTORY:
-                return HistoryContract.HistoryEntry.CONTENT_TYPE;
+                return HistoryContract.HistoryEntry.Companion.getCONTENT_TYPE();
             case SEARCH_HISTORY_DATE:
             case SEARCH_HISTORY_ID:
             case SEARCH_HISTORY_IS_HISTORY:
-                return HistoryContract.HistoryEntry.CONTENT_ITEM;
+                return HistoryContract.HistoryEntry.Companion.getCONTENT_ITEM();
             default:
                 throw new UnsupportedOperationException("Uknown Uri: " + uri);
 
@@ -152,7 +152,7 @@ public class HistoryProvider extends ContentProvider {
             case SEARCH_HISTORY:
                 _id = db.insert(HistoryContract.HistoryEntry.TABLE_NAME, null, values);
                 if (_id > 0) {
-                    retUri = HistoryContract.HistoryEntry.buildHistoryUri(_id);
+                    retUri = HistoryContract.HistoryEntry.Companion.buildHistoryUri(_id);
                 }
                 else {
                     throw new UnsupportedOperationException("Unable to insert rows into: " + uri);
