@@ -35,6 +35,8 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation project(':library')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "androidx.arch.core:core-runtime:2.0.1"
+
 }
 repositories {
     mavenCentral()
