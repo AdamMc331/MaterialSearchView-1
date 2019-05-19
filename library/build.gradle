@@ -38,6 +38,10 @@ android {
       abortOnError false
     }
 
+    packagingOptions {
+        exclude 'META-INF/atomicfu.kotlin_module'
+    }
+
     useLibrary 'android.test.base'
 }
 
