@@ -9,4 +9,7 @@ interface HistoryDAO {
 
     @Insert
     suspend fun insert(historyItem: HistoryItem): Long
+
+    @Query("DELETE FROM SEARCH_HISTORY")
+    suspend fun deleteAll(): Int
 }
