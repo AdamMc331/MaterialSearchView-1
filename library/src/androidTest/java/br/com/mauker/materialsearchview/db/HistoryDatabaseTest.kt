@@ -1,24 +1,30 @@
 package br.com.mauker.materialsearchview.db
 
-import android.test.AndroidTestCase
+import android.content.Context
 import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
-class HistoryDatabaseTest : AndroidTestCase() {
+@RunWith(AndroidJUnit4::class)
+class HistoryDatabaseTest {
     private lateinit var database: HistoryDatabase
     private lateinit var historyDAO: HistoryDAO
 
     @Before
-    override fun setUp() {
+    fun setUp() {
+        val mContext = ApplicationProvider.getApplicationContext<Context>()
         database = Room.inMemoryDatabaseBuilder(mContext, HistoryDatabase::class.java).allowMainThreadQueries().build()
         historyDAO = database.historyDAO()
     }
 
     @After
-    override fun tearDown() {
+    fun tearDown() {
         runBlocking {
             historyDAO.deleteAll()
             database.close()
@@ -26,7 +32,16 @@ class HistoryDatabaseTest : AndroidTestCase() {
     }
 
     @Test
-    fun testInsertReadItems() {
-        // TODO: Implement
+    fun testInsertReadItem() {
+        runBlocking {
+            val testQuery = "Adam"
+            val testItem = HistoryItem(query = testQuery)
+
+            val newId = historyDAO.insert(testItem)
+
+            val expected = testItem.copy(id = newId)
+            val results = historyDAO.getHistoryForQuery(testQuery)
+            assertEquals(expected, results.first())
+        }
     }
 }
